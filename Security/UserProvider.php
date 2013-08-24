@@ -64,8 +64,14 @@ class UserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Expected an instance of %s, but got "%s".', $this->userManager->getClass(), get_class($user)));
         }
 
-        if (null === $reloadedUser = $this->userManager->findUserBy(array('id' => $user->getId()))) {
-            throw new UsernameNotFoundException(sprintf('User with ID "%d" could not be reloaded.', $user->getId()));
+        $reloadedUser = $this->userManager->findUserBy(array('id' => $user->getId()));
+
+        if (null === $reloadedUser) {
+            $reloadedUser = $this->userManager->findUserBy(array('usernameCanonical' => $user->getUsernameCanonical()));
+        }
+
+        if (null === $reloadedUser) {
+            throw new UsernameNotFoundException(sprintf('User with usernameCanonical "%s" could not be reloaded.', $user->getUsernameCanonical()));
         }
 
         return $reloadedUser;
